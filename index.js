@@ -1,13 +1,13 @@
 const inquirer = require('inquirer');
 const table = require('table');
 
-function showTable(data, cb){
+function showTable(data){
     let tableData = [];
     tableData = [
         Object.keys(data[0]),
          ...data.map(val => Object.values(val))];
-         
-    inquirer.createPromptModule([
+
+    return await inquirer.prompt([
         {
             message: tableData,
             type: 'input',
