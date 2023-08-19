@@ -1,0 +1,24 @@
+{
+  "name": "emp-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rstreep/emp-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rstreep/emp-tracker/issues"
+  },
+  "homepage": "https://github.com/rstreep/emp-tracker#readme",
+  "dependencies": {
+    "inquirer": "^8.2.4",
+    "table": "^6.8.1"
+  }
+}
