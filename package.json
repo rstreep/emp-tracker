@@ -19,6 +19,7 @@
   "homepage": "https://github.com/rstreep/emp-tracker#readme",
   "dependencies": {
     "inquirer": "^8.2.4",
+    "mysql": "^2.18.1",
     "table": "^6.8.1"
   }
 }
