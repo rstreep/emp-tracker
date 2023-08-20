@@ -1,27 +1,199 @@
 const inquirer = require('inquirer');
-const table = require('table');
+const cTable = require('console.table');
+const db = require('./config/connection');
 
-function showTable(data){
-    let tableData = [];
-    tableData = [
-        Object.keys(data[0]),
-         ...data.map(val => Object.values(val))];
-
-    return await inquirer.prompt([
-        {
-            message: tableData,
-            type: 'input',
-            name: 'name'
-        }
-    ])
-    .then( () => {
-        if(cb) cb();
-        console.log("done!");
-    })
-}
-
-dbData = [
-    { id: 1, name: "Rich" },
-    { id: 2, name: "Scarlet" },
-    { id: 3, name: "Nellie" },
+const questions = [
+    {
+        type: 'list',
+        message: 'Please select an option',
+        name: 'option',
+        choices: ['View all departments', 'Add a department', 'View all roles', 'Add a role', 'View all employees', 'Add an employee', 'Update employee info', 'Exit']
+    }
 ]
+
+function init() {
+    inquirer.prompt(questions)
+        .then( (answers) => {
+            if (answers.option == 'View all departments') {
+                viewDepartments()
+            } else if (answers.option == 'Add a department') {
+                addDepartment()
+            } else if (answers.option == 'View all roles') {
+                viewRoles()
+            } else if (answers.option == 'Add a role') {
+                addRole()
+            } else if (answers.option == 'View all employees') {
+                viewEmployees()
+            } else if (answers.option == 'Add an employee') {
+                addEmployee()
+            } else if (answers.option == 'Update employee info') {
+                updateEmployee()
+            } else if (answers.option == 'Exit') {
+                console.log('Exit');
+                process.exit();
+            }
+        })
+};
+
+function viewDepartments() {
+    const queryString = 'SELECT * FROM department;';
+    db.query(queryString, (err, result) => {
+        if (err) {
+            console.log(err)
+            return
+        }
+
+        console.table(result);
+        init();
+    })
+};
+
+function viewRoles() {
+    const queryString = 'SELECT role.id, role.title, role.salary, department.name as department FROM role INNER JOIN department ON role.department_id = department_id;';
+    db.query(queryString, (err, result) => {
+        if (err) {
+            console.log(err)
+            return
+        }
+
+        console.table(result);
+        init();
+    })
+};
+
+function viewEmployees() {
+    const queryString = `SELECT employee.id, employee.first_name, employee.last_name, role.title AS role, role.salary, department.name AS department
+    FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department_id;`;
+    db.query(queryString, (err, result) => {
+        if (err) {
+            console.log(err)
+            return
+        }
+
+        console.table(result);
+        init();
+    })
+};
+
+function addDepartment() {
+    const departmentQ = [
+        {
+            type: 'input',
+            name: 'department_name',
+            message: 'Please enter the name of the new department:'
+        }
+    ]
+
+    inquirer.prompt(departmentQ)
+        .then( (answers) => {
+            const queryString = `INSERT INTO department (name) VALUES ('${answers.department_name});`
+            db.query(queryString, (err, result) => {
+                if (err) {
+                    console.log(err)
+                    return
+                }
+                console.table(result);
+                init();
+            })
+        })
+};
+
+function addRole() {
+
+    const departmentQuery = `SELECT * FROM department;`
+    db.query(departmentQuery, (err, result) => {
+        if (err) {
+            console.log(err)
+            return
+        }
+
+        const departmentChoices = result.map(department => ({
+            name: department.name,
+            value: department.id
+        }));
+
+        const roleQ = [
+            {
+                type: 'input',
+                name: 'title',
+                message: 'Please enter the title of the new role:'
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: 'Enter the salary for this role:'
+            },
+            {
+                type: 'list',
+                name: 'departmentId',
+                message: 'Select the department for this role:',
+                choices: departmentChoices
+            }
+        ];
+
+        inquirer.prompt(roleQ)
+            .then(roleAnswers => {
+                const queryString = `INSERT INTO role (title, salary, department_id) VALUES ('${roleAnswers.title}', ${parseFloat(roleAnswers.salary)}, ${roleAnswers.departmentId});`;
+
+                db.query(queryString, (err, result) => {
+                    if (err) {
+                        console.log(err)
+                        return
+                    }
+
+                    console.log('New role added sucessfully!')
+                    init()
+                });
+            });
+    });
+};
+
+function addEmployee() {
+    const roleQuery = `SELECT * FROM role;`
+    db.query(roleQuery, (err, result) => {
+        if(err) {
+            console.log(err)
+            return
+        }
+
+        const roleChoices = result.map(role => ({
+            name: role.title,
+            value: role.id
+        }));
+
+        const employeeQ = [
+            {
+                type: 'input',
+                name: 'first_name',
+                message: 'What is the employees first name?'
+            },
+            {
+                type: 'input',
+                name: 'last_name',
+                message: 'What is the employees last name?'
+            },
+            {
+                type: 'list',
+                name: 'roleId',
+                message: 'What is the employees role?',
+                choices: roleChoices
+            }
+        ]
+
+        inquirer.prompt(employeeQ)
+            .then( (answers) => {
+                const queryString = `INSERT INTO employee (first_name, last_name, role_id) VALUES ('${answers.first_name}', '${answers.last_name}', ${answers.role_id});`;
+                db.query(queryString, (err, result) => {
+                    if (err) {
+                        console.log(err);
+                        return;
+                    }
+
+                    console.log('New employee added successfully!');
+                    init();
+                });
+            });
+    });
+};
+
+init();
