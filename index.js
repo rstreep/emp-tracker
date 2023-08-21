@@ -203,4 +203,70 @@ function addEmployee() {
   });
 }
 
+function updateEmployee() {
+  const employeeQuery = `SELECT * FROM employee;`;
+  db.query(employeeQuery, (err, employeeResult) => {
+    if (err) {
+      console.log(err);
+      return;
+    }
+
+    const employeeChoices = employeeResult.map((employee) => ({
+      name: `${employee.first_name} ${employee.last_name}`,
+      value: employee.id,
+    }));
+
+    const roleQuery = `SELECT * FROM role;`;
+    db.query(roleQuery, (err, roleResult) => {
+      if (err) {
+        console.log(err);
+        return;
+      }
+
+      const roleChoices = roleResult.map((role) => ({
+        name: role.title,
+        value: role.id,
+      }));
+
+      const updateEmployeeQ = [
+        {
+          type: "list",
+          name: "employee_id",
+          message: "Select the employee to update:",
+          choices: employeeChoices,
+        },
+        {
+          type: "input",
+          name: "new_first_name",
+          message: "Enter the new first name:",
+        },
+        {
+          type: "input",
+          name: "new_last_name",
+          message: "Enter the new last name:",
+        },
+        {
+          type: "list",
+          name: "new_role_id",
+          message: "Select the new role for the employee:",
+          choices: roleChoices,
+        },
+      ];
+
+      inquirer.prompt(updateEmployeeQ).then((answers) => {
+        const queryString = `UPDATE employee SET first_name = '${answers.new_first_name}', last_name = '${answers.new_last_name}', role_id = ${answers.new_role_id} WHERE id = ${answers.employee_id};`;
+        db.query(queryString, (err, result) => {
+          if (err) {
+            console.log(err);
+            return;
+          }
+
+          console.log("Employee information updated successfully!");
+          init();
+        });
+      });
+    });
+  });
+}
+
 init();
