@@ -94,7 +94,7 @@ function addDepartment() {
   ];
 
   inquirer.prompt(departmentQ).then((answers) => {
-    const queryString = `INSERT INTO department (name) VALUES ('${answers.department_name});`;
+    const queryString = `INSERT INTO department (name) VALUES ('${answers.department_name}');`;
     db.query(queryString, (err, result) => {
       if (err) {
         console.log(err);
@@ -132,7 +132,7 @@ function addRole() {
       },
       {
         type: "list",
-        name: "departmentId",
+        name: "department_id",
         message: "Select the department for this role:",
         choices: departmentChoices,
       },
@@ -141,7 +141,7 @@ function addRole() {
     inquirer.prompt(roleQ).then((roleAnswers) => {
       const queryString = `INSERT INTO role (title, salary, department_id) VALUES ('${
         roleAnswers.title
-      }', ${parseFloat(roleAnswers.salary)}, ${roleAnswers.departmentId});`;
+      }', ${parseFloat(roleAnswers.salary)}, ${roleAnswers.department_id});`;
 
       db.query(queryString, (err, result) => {
         if (err) {
@@ -182,7 +182,7 @@ function addEmployee() {
       },
       {
         type: "list",
-        name: "roleId",
+        name: "role_id",
         message: "What is the employees role?",
         choices: roleChoices,
       },
